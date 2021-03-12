@@ -1,0 +1,89 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="reply">
+	<select id="selectReplyList" resultType="hashmap" parameterType ="hashmap">
+	<![CDATA[
+		SELECT
+			*
+		FROM
+			one_board_reply1
+		WHERE 
+			b_idx = #{IDX}
+		ORDER BY
+			reply_IDX DESC
+		LIMIT #{pageStart}, #{perPageNum}
+	]]>
+	</select>
+
+	<insert id="insertReply" parameterType="hashmap" useGeneratedKeys="true" keyProperty="reply_IDX">
+	<![CDATA[
+		INSERT INTO one_board_reply1
+		(
+			b_idx,
+			reply_text,
+			reply_writer,
+			reg_date,
+			update_date
+		)
+		VALUES
+		(
+			#{ b_idx},
+			#{ replyText},
+			#{ replywriter},
+			SYSDATE(),
+			SYSDATE()
+		)
+	]]>
+	</insert>
+	<select id="detailReply" resultType = "hashmap">
+	<![CDATA[
+		SELECT
+			reply_IDX,
+			IDX,
+			reply_text,
+			reply_writer,
+			IF (
+				DATE_FORMAT(reg_date, '%Y%m%d') < DATE_FORMAT(now(),'%Y%m%d'),
+                DATE_FORMAT(reg_date, '%Y.%m.%d'),
+                DATE_FORMAT(reg_date, '%H:%i')
+			) as reg_date,
+			update_date
+		FROM
+			one_board_reply1
+		WHERE
+			IDX =#{ idx}
+	]]>
+	</select>
+	<update id = "updateReply" parameterType ="hashmap">
+		<![CDATA[
+			UPDATE
+				one_board_reply1
+			SET
+				reply_text = #{ replyText},
+				reply_writer = #{ replywriter},
+				update_date = SYSDATE()
+			WHERE
+				reply_IDX = #{ replyIDX}
+		]]>
+	</update>
+	<delete id = "deleteReply">
+		<![CDATA[
+			DELETE
+			FROM
+				one_board_reply1
+			WHERE
+				reply_IDX = #{ replyIDX}
+		]]>
+	</delete>
+
+	<select id= "countReplyList" resultType = "Integer" parameterType ="hashmap">
+    	<![CDATA[
+    		SELECT
+			COUNT(*)
+		FROM
+			one_board_reply1
+		WHERE 
+			b_idx = #{IDX}
+    	]]>
+    </select>
+</mapper>

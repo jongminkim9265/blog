@@ -1,0 +1,82 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="listed">
+	<select id="list" resultType="hashmap" parameterType="hashmap">
+		SELECT
+			*
+		FROM 
+			one_board_reply
+		WHERE IDX = #{ IDX}
+		ORDER BY reply_IDX
+	</select>
+	<!--댓글 목록 + 페이징-->
+    <select id="listPaging" resultType="hashmap">
+        SELECT
+            reply_IDX,
+            IDX,
+            reply_text,
+            reply_writer,
+            reg_date,
+            update_date,
+        FROM 
+        	one_board_reply 
+        WHERE IDX = #{IDX}
+        ORDER BY reply_IDX
+        LIMIT #{criteria.pageStart}, #{criteria.perPageNum}
+    </select>
+	<insert id="create" parameterType="hashmap">
+		INSERT INTO one_board_reply 
+		(
+			IDX ,
+			reply_text,
+			reply_writer		
+		)
+		VALUES
+		(
+			#{ IDX},
+			#{ replyText},
+			#{ replyWriter}
+		)
+	</insert>
+	<update id="update">
+		UPDATE one_board_reply
+		SET 
+			reply_text = #{ replyText},
+			update_date = SYSDATE(),
+		WHRERE reply_IDX = #{ replyIDX}
+	
+	</update>
+	<delete id = "delete">
+		DELETE FROM one_board_reply
+		WHERE reply_IDX = #{replyIDX}
+	</delete>
+	<select id = "count" resultType="int">
+		SELECT COUNT(IDX) 
+		FROM
+			one_board_reply
+		WHERE
+			IDX = #{ IDX}
+	</select>
+	<!--특정 댓글의 게시글 번호-->
+    <select id="getBno" resultType="int">
+        SELECT
+        	IDX
+        FROM one_board_reply
+        WHERE reply_IDX = #{reply_IDX}
+    </select>
+
+    <!--회원이 작성한 댓글 목록-->
+    <select id="userReplies" resultType = "hashmap">
+        SELECT
+            r.replytext
+            , r.regdate
+            , b.title
+            , b.bno
+        FROM one_board_reply r
+            LEFT OUTER JOIN one_board b
+                ON b.bno = r.bno
+        WHERE reply_writer = #{ IDX}
+    </select>
+    
+    
+</mapper>

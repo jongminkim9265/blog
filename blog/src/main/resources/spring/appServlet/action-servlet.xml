@@ -1,0 +1,66 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns:mvc="http://www.springframework.org/schema/mvc"
+	xmlns:p="http://www.springframework.org/schema/p"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xmlns="http://www.springframework.org/schema/beans"
+	xmlns:context="http://www.springframework.org/schema/context"
+	xmlns:aop="http://www.springframework.org/schema/aop"
+	xmlns:websocket="http://www.springframework.org/schema/websocket"
+	xsi:schemaLocation="http://www.springframework.org/schema/mvc 
+		https://www.springframework.org/schema/mvc/spring-mvc.xsd
+		http://www.springframework.org/schema/beans 
+		https://www.springframework.org/schema/beans/spring-beans.xsd
+		http://www.springframework.org/schema/websocket http://www.springframework.org/websocket/spring-websocket.xsd
+		http://www.springframework.org/schema/context https://www.springframework.org/schema/context/spring-context.xsd		
+		http://www.springframework.org/schema/aop
+		http://www.springframework.org/schema/aop/spring-aop.xsd">
+	<!-- DispatcherServlet Context: defines this servlet's request-processing infrastructure -->
+	<mvc:annotation-driven>
+        <mvc:argument-resolvers>
+            <bean class="blog.today.common.resolver.CustomMapArgumentResolver"></bean>
+        </mvc:argument-resolvers>
+    </mvc:annotation-driven>
+	<mvc:interceptors> 
+		<mvc:interceptor>
+		 <mvc:mapping path="/**"/>
+		  <bean id="loggerInterceptor" class="blog.today.common.interceptor.CommonInterceptor"></bean> 
+		  </mvc:interceptor>
+		   </mvc:interceptors>
+		    <aop:aspectj-autoproxy/>
+		     <bean id="loggerAspect" class="blog.today.logger.LoggerAspect" /> 
+		     <bean class="org.springframework.web.servlet.mvc.annotation.DefaultAnnotationHandlerMapping"/>
+		     <bean class="org.springframework.web.servlet.view.BeanNameViewResolver" p:order="0" />
+		     <bean id="jsonView" class="org.springframework.web.servlet.view.json.MappingJackson2JsonView" />
+
+	<mvc:view-controller path="/second/chatting.jsp" view-name="/second/chatting"/>
+	<!-- Handles HTTP GET requests for /resources/** by efficiently serving up static resources in the ${webappRoot}/resources directory -->
+	
+	<mvc:resources mapping="/resources/**" location="/resources/" />
+	 
+	<mvc:resources mapping="/dist/**" location="/resources/dist/" />
+	<mvc:resources mapping="/plugins/**" location="/resources/plugins/" />
+	<mvc:resources mapping="/pages/**" location="/resources/pages/" />
+
+	<!-- Resolves views selected for rendering by @Controllers to .jsp resources in the /WEB-INF/views directory -->
+	<bean class="org.springframework.web.servlet.view.UrlBasedViewResolver" p:order="1"
+	 p:viewClass="org.springframework.web.servlet.view.JstlView" 
+	 p:prefix="/WEB-INF/views" p:suffix=".jsp"> </bean>
+
+	
+	<context:component-scan base-package="blog" use-default-filters="false">
+		<context:include-filter type = "annotation" expression="org.springframework.stereotype.Controller"/>
+	</context:component-scan>
+		<!-- websocket handler -->
+	<bean id="echoHandler" class="blog.today.handler.EchoHandler" />
+ 
+	<websocket:handlers>
+		<websocket:mapping handler="echoHandler" path="/echo.do" />
+		 
+		<websocket:handshake-interceptors>
+	         <bean class="org.springframework.web.socket.server.support.HttpSessionHandshakeInterceptor"/>
+	      </websocket:handshake-interceptors>
+ 		 
+	      <websocket:sockjs/>
+	 </websocket:handlers>
+	
+</beans>
